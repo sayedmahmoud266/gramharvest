@@ -1,0 +1,22 @@
+{
+    "manifest_version": 3,
+    "name": "Instagram Session Exporter",
+    "version": "1.0",
+    "description": "Exports Instagram session data to the scraper application.",
+    "permissions": [
+        "cookies",
+        "storage",
+        "activeTab",
+        "scripting",
+        "downloads"
+    ],
+    "host_permissions": [
+        "*://*.instagram.com/*"
+    ],
+    "action": {
+        "default_popup": "popup.html"
+    },
+    "background": {
+        "service_worker": "background.js"
+    }
+}
