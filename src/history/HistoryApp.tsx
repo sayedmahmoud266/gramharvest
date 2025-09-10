@@ -205,8 +205,8 @@ const HistoryApp: React.FC = () => {
         {/* Export Modal */}
         {showExportModal && selectedItem && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-              <h3 className="text-lg font-semibold mb-4">Export Data for @{selectedItem.username}</h3>
+            <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 text-gray-900">
+              <h3 className="text-lg font-semibold mb-4 text-gray-900">Export Data for @{selectedItem.username}</h3>
               <div className="space-y-3">
                 <button
                   onClick={() => handleExport(selectedItem, { type: 'json', filename: `${selectedItem.username}_data.json` })}
@@ -240,9 +240,9 @@ const HistoryApp: React.FC = () => {
         {/* Preview Modal */}
         {showPreview && selectedItem && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+            <div className="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[80vh] overflow-y-auto text-gray-900">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold">Preview: @{selectedItem.username}</h3>
+                <h3 className="text-lg font-semibold text-gray-900">Preview: @{selectedItem.username}</h3>
                 <button
                   onClick={() => setShowPreview(false)}
                   className="text-gray-500 hover:text-gray-700"
@@ -255,16 +255,21 @@ const HistoryApp: React.FC = () => {
               <div className="space-y-2 max-h-96 overflow-y-auto">
                 {selectedItem.posts && selectedItem.posts.length > 0 ? (
                   selectedItem.posts.map((post, index) => (
-                    <div key={index} className="border rounded p-3 text-sm">
-                      <div className="font-medium">{post.author}</div>
+                    <div key={index} className="border border-gray-200 rounded p-3 text-sm bg-gray-50">
+                      <div className="font-medium text-gray-900">{post.author}</div>
                       <div className="text-gray-600 text-xs">{post.type} • {post.createdAt}</div>
-                      <div className="mt-1">{post.caption}</div>
+                      <div className="mt-1 text-gray-800">{post.caption}</div>
+                      {post.thumbnailUrl && (
+                        <div className="mt-2">
+                          <img src={post.thumbnailUrl} alt="Post thumbnail" className="w-20 h-20 object-cover rounded" />
+                        </div>
+                      )}
                       <div className="flex gap-4 mt-2 text-xs text-gray-500">
                         <span>❤️ {post.likes}</span>
                         <span>💬 {post.comments}</span>
                         {post.views && <span>👁️ {post.views}</span>}
                       </div>
-                      <a href={post.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 text-xs">
+                      <a href={post.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 text-xs underline">
                         View Post
                       </a>
                     </div>
@@ -275,7 +280,7 @@ const HistoryApp: React.FC = () => {
                     <div className="mt-4 space-y-1">
                       {selectedItem.links.map((link, index) => (
                         <div key={index}>
-                          <a href={link} target="_blank" rel="noopener noreferrer" className="text-blue-500 text-sm">
+                          <a href={link} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 text-sm underline">
                             {link}
                           </a>
                         </div>

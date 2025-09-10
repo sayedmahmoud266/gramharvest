@@ -1,4 +1,5 @@
-import { ScrapingState, HistoryItem, ScrapeResult, ChromeMessage, PostData } from '../types';
+import { ScrapingState, HistoryItem, PostData, ScrapeResult, ChromeMessage } from '../types';
+import * as XLSX from 'xlsx';
 
 // State management
 let state: ScrapingState = {
@@ -444,9 +445,9 @@ async function handleExportData(message: any): Promise<void> {
       break;
     case 'csv':
       if (historyItem.posts && historyItem.posts.length > 0) {
-        const headers = 'URL,Author,Caption,Likes,Comments,Created At,Views,Type\n';
+        const headers = 'URL,Author,Caption,Thumbnail URL,Likes,Comments,Created At,Views,Type,Page Type\n';
         const rows = historyItem.posts.map((post: PostData) => 
-          `"${post.url}","${post.author}","${post.caption.replace(/"/g, '""')}",${post.likes},${post.comments},"${post.createdAt}",${post.views || 0},"${post.type}"`
+          `"${post.url}","${post.author || ''}","${(post.caption || '').replace(/"/g, '""').replace(/[\r\n]+/g, ' ')}","${post.thumbnailUrl || ''}",${post.likes || 0},${post.comments || 0},"${post.createdAt || ''}",${post.views || ''},"${post.type || 'post'}","${post.pageType || ''}"`
         ).join('\n');
         content = headers + rows;
       } else {
@@ -455,22 +456,59 @@ async function handleExportData(message: any): Promise<void> {
       mimeType = 'text/csv';
       break;
     case 'excel':
-      // For Excel, we'll use CSV format with .xlsx extension
+      // Create proper XLSX file using xlsx library
       if (historyItem.posts && historyItem.posts.length > 0) {
-        const headers = 'URL\tAuthor\tCaption\tLikes\tComments\tCreated At\tViews\tType\n';
-        const rows = historyItem.posts.map((post: PostData) => 
-          `${post.url}\t${post.author}\t${post.caption}\t${post.likes}\t${post.comments}\t${post.createdAt}\t${post.views || 0}\t${post.type}`
-        ).join('\n');
-        content = headers + rows;
+        const worksheetData = [
+          ['URL', 'Author', 'Caption', 'Thumbnail URL', 'Likes', 'Comments', 'Created At', 'Views', 'Type', 'Page Type'],
+          ...historyItem.posts.map((post: PostData) => [
+            post.url,
+            post.author || '',
+            (post.caption || '').replace(/[\r\n]+/g, ' '),
+            post.thumbnailUrl || '',
+            post.likes || 0,
+            post.comments || 0,
+            post.createdAt || '',
+            post.views || '',
+            post.type || 'post',
+            post.pageType || ''
+          ])
+        ];
+        
+        const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Instagram Posts');
+        
+        // Generate XLSX file as base64
+        const xlsxBuffer = XLSX.write(workbook, { type: 'base64', bookType: 'xlsx' });
+        content = xlsxBuffer;
+        mimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
       } else {
-        content = 'URL\n' + historyItem.links.join('\n');
+        // Fallback for links-only data
+        const worksheetData = [
+          ['URL'],
+          ...historyItem.links.map((link: string) => [link])
+        ];
+        
+        const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Instagram Links');
+        
+        const xlsxBuffer = XLSX.write(workbook, { type: 'base64', bookType: 'xlsx' });
+        content = xlsxBuffer;
+        mimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
       }
-      mimeType = 'application/vnd.ms-excel';
       break;
   }
 
   // Create data URL instead of blob URL for service worker compatibility
-  const dataUrl = `data:${mimeType};charset=utf-8,${encodeURIComponent(content)}`;
+  let dataUrl: string;
+  if (format === 'excel') {
+    // For XLSX files, content is already base64 encoded
+    dataUrl = `data:${mimeType};base64,${content}`;
+  } else {
+    // For JSON and CSV, encode as UTF-8
+    dataUrl = `data:${mimeType};charset=utf-8,${encodeURIComponent(content)}`;
+  }
   
   suggestedFileName = filename;
   chrome.downloads.download({

@@ -11,11 +11,13 @@ export interface PostData {
   url: string;
   author: string;
   caption: string;
+  thumbnailUrl?: string;
   likes: number;
   comments: number;
   createdAt: string;
   views?: number;
   type: 'post' | 'reel' | 'story';
+  pageType?: string;
 }
 
 export interface HistoryItem {
