@@ -75,7 +75,7 @@ const PopupApp: React.FC = () => {
               </div>
               <button
                 onClick={handleStopScraping}
-                className="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 shadow-lg"
+                className="w-full pointer bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 shadow-lg"
               >
                 Stop Scraping
               </button>
@@ -87,14 +87,14 @@ const PopupApp: React.FC = () => {
               </p>
               <button
                 onClick={handleStartScraping}
-                className="w-full bg-white text-instagram-primary font-semibold py-3 px-4 rounded-lg hover:bg-gray-100 transition-colors duration-200 shadow-lg"
+                className="w-full pointer bg-gradient-to-r from-[#833ab4] via-[#fd1d1d] to-[#fcb045] font-semibold py-3 px-4 rounded-lg transition-colors duration-200 shadow-lg"
               >
                 Scrape Current Profile
               </button>
               {showDownloadButton && (
                 <button
                   onClick={handleDownloadPartial}
-                  className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 shadow-lg"
+                  className="w-full pointer bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 shadow-lg"
                 >
                   Download Results
                 </button>
