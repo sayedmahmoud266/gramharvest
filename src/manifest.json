@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
-    "name": "Instagram Session Exporter",
-    "version": "1.0",
-    "description": "Exports Instagram session data to the scraper application.",
+    "name": "Instagram Profile Scraper",
+    "version": "1.0.0",
+    "description": "Scrape all post and reel links from Instagram profiles with a modern React interface.",
     "permissions": [
         "cookies",
         "storage",
@@ -18,5 +18,10 @@
     },
     "background": {
         "service_worker": "background.js"
+    },
+    "icons": {
+        "16": "icons/icon16.png",
+        "48": "icons/icon48.png",
+        "128": "icons/icon128.png"
     }
 }

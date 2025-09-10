@@ -1,6 +1,14 @@
 # Instagram Profile Scraper Extension
 
-This is a simple Chrome extension to scrape all post and reel links from an Instagram profile page.
+A modern Chrome extension built with React + TypeScript + TailwindCSS to scrape all post and reel links from Instagram profile pages.
+
+## Tech Stack
+
+- **React 18** with TypeScript for UI components
+- **Vite** for fast development and building
+- **TailwindCSS** for modern, responsive styling
+- **Gulp** for Chrome extension packaging
+- **Chrome Extension Manifest v3**
 
 ## Features
 
@@ -10,18 +18,47 @@ This is a simple Chrome extension to scrape all post and reel links from an Inst
 - **Stop & Resume:** You can stop the scraping process at any time.
 - **Download Results:** Download the scraped links as a JSON file.
 - **Scraping History:** View a history of all past scraping jobs, with the ability to re-download the results at any time.
+- **Modern UI:** Beautiful gradient interface with Instagram-inspired colors and smooth animations.
+
+## Development
+
+### Prerequisites
+- Node.js (v16 or higher)
+- Yarn package manager
+
+### Setup
+1. **Clone the repository:**
+   ```bash
+   git clone <repository-url>
+   cd instagram-scrapper
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   yarn install
+   ```
+
+3. **Build the extension:**
+   ```bash
+   yarn build:extension
+   ```
+
+4. **For development with hot reload:**
+   ```bash
+   yarn watch:extension
+   ```
 
 ## Installation
 
 Since this extension is not on the Chrome Web Store, you need to load it manually in Developer Mode.
 
-1.  **Download or Clone:** Download this repository to your local machine.
+1.  **Build the extension:** Run `yarn build:extension` to create the `extension` folder.
 2.  **Open Chrome Extensions:** Open your Chrome browser and navigate to `chrome://extensions`.
 3.  **Enable Developer Mode:** In the top-right corner of the extensions page, turn on the **Developer mode** toggle.
 4.  **Load Unpacked:** Click the **"Load unpacked"** button that appears. A file dialog will open.
 5.  **Select Folder:** Navigate to the location where you downloaded this repository and select the `extension` folder.
 
- The "Instagram Scraper" extension should now appear in your list of extensions and be ready to use.
+ The "Instagram Profile Scraper" extension should now appear in your list of extensions and be ready to use.
 
 ## How to Use
 
