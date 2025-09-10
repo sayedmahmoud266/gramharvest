@@ -14,6 +14,7 @@ const PopupApp: React.FC = () => {
     stopScraping: false,
   });
   const [settings, setSettings] = useState({ autoScroll: true });
+  const [defaultExportFormat, setDefaultExportFormat] = useState<'json' | 'csv' | 'excel'>('json');
 
   useEffect(() => {
     // Get initial state and settings when popup opens
@@ -23,10 +24,12 @@ const PopupApp: React.FC = () => {
       }
     });
 
-    // Load settings
-    chrome.storage.local.get('scrapingSettings', (data) => {
+    // Load settings and export format
+    chrome.storage.local.get(['scrapingSettings', 'defaultExportFormat'], (data) => {
       const settingsData = data.scrapingSettings || { autoScroll: true };
+      const exportFormat = data.defaultExportFormat || 'json';
       setSettings(settingsData);
+      setDefaultExportFormat(exportFormat);
     });
 
     // Listen for updates from the background script
@@ -58,7 +61,15 @@ const PopupApp: React.FC = () => {
   };
 
   const handleDownloadPartial = () => {
-    chrome.runtime.sendMessage({ command: 'download-partial' });
+    // Use the default export format for downloads
+    const fileExtension = defaultExportFormat === 'excel' ? 'xlsx' : defaultExportFormat;
+    const filename = state.currentUsername ? `${state.currentUsername}_data.${fileExtension}` : `instagram_data.${fileExtension}`;
+    
+    chrome.runtime.sendMessage({ 
+      command: 'download-partial',
+      format: defaultExportFormat,
+      filename 
+    });
   };
 
   const handleAutoScrollToggle = (enabled: boolean) => {

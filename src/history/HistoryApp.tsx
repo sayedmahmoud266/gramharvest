@@ -11,14 +11,17 @@ const HistoryApp: React.FC = () => {
   const [showExportModal, setShowExportModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState<HistoryItem | null>(null);
   const [showPreview, setShowPreview] = useState(false);
+  const [defaultExportFormat, setDefaultExportFormat] = useState<'json' | 'csv' | 'excel'>('json');
 
   useEffect(() => {
-    // Load history and settings from storage
-    chrome.storage.local.get(['scrapingHistory', 'scrapingSettings'], (data) => {
+    // Load history, settings, and export format from storage
+    chrome.storage.local.get(['scrapingHistory', 'scrapingSettings', 'defaultExportFormat'], (data) => {
       const historyData = data.scrapingHistory || [];
       const settingsData = data.scrapingSettings || { autoScroll: true };
+      const exportFormat = data.defaultExportFormat || 'json';
       setHistory(historyData);
       setSettings(settingsData);
+      setDefaultExportFormat(exportFormat);
       setLoading(false);
 
       // Check if we should auto-download the latest item
@@ -40,7 +43,22 @@ const HistoryApp: React.FC = () => {
   }, []);
 
   const handleDownload = (historyId: number) => {
-    chrome.runtime.sendMessage({ command: 'download-history', historyId });
+    // Use the default export format for downloads
+    const fileExtension = defaultExportFormat === 'excel' ? 'xlsx' : defaultExportFormat;
+    const historyItem = history.find(item => item.id === historyId);
+    const filename = historyItem ? `${historyItem.username}_data.${fileExtension}` : `instagram_data.${fileExtension}`;
+    
+    chrome.runtime.sendMessage({ 
+      command: 'export-data', 
+      historyId, 
+      format: defaultExportFormat,
+      filename 
+    });
+  };
+
+  const handleExportFormatChange = (format: 'json' | 'csv' | 'excel') => {
+    setDefaultExportFormat(format);
+    chrome.storage.local.set({ defaultExportFormat: format });
   };
 
   const handleExport = (item: HistoryItem, format: ExportFormat) => {
@@ -105,6 +123,18 @@ const HistoryApp: React.FC = () => {
                 <p className="text-xs text-white/60 mt-1">v{VERSION}</p>
               </div>
               <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <label className="text-white/80 text-sm">Default Export:</label>
+                  <select
+                    value={defaultExportFormat}
+                    onChange={(e) => handleExportFormatChange(e.target.value as 'json' | 'csv' | 'excel')}
+                    className="px-3 py-1 rounded border border-gray-300 bg-white text-gray-900 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="json">JSON</option>
+                    <option value="csv">CSV</option>
+                    <option value="excel">Excel</option>
+                  </select>
+                </div>
                 <div className="flex items-center gap-2">
                   <label className="text-white/80 text-sm">Auto-scroll:</label>
                   <input

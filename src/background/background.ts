@@ -27,7 +27,7 @@ chrome.runtime.onMessage.addListener((message: ChromeMessage, _sender, sendRespo
   } else if (message.command === 'download-history' && message.historyId) {
     downloadHistoryItem(message.historyId);
   } else if (message.command === 'download-partial') {
-    handlePartialDownloadRequest();
+    handlePartialDownloadRequest(message);
   } else if (message.command === 'export-data') {
     handleExportData(message);
   } else if (message.command === 'clear-history') {
@@ -115,7 +115,7 @@ function stopScraping(): void {
   }
 }
 
-async function saveHistory(username: string, links: string[], posts: any[] = []): Promise<void> {
+async function saveHistory(username: string, links: string[], posts: any[] = []): Promise<HistoryItem> {
   const { scrapingHistory = [] } = await chrome.storage.local.get('scrapingHistory');
   const newHistoryItem: HistoryItem = {
     id: Date.now(),
@@ -128,16 +128,26 @@ async function saveHistory(username: string, links: string[], posts: any[] = [])
   const updatedHistory = [newHistoryItem, ...scrapingHistory];
   await chrome.storage.local.set({ scrapingHistory: updatedHistory });
   sendHistoryUpdate(updatedHistory);
+  return newHistoryItem;
 }
 
-async function handlePartialDownloadRequest(): Promise<void> {
+async function handlePartialDownloadRequest(message: any): Promise<void> {
   if (!lastStoppedJob) return;
 
   // Save the partial job to history, making it the latest item
-  await saveHistory(lastStoppedJob.username, lastStoppedJob.links, lastStoppedJob.posts);
+  const historyItem = await saveHistory(lastStoppedJob.username, lastStoppedJob.links, lastStoppedJob.posts);
 
-  // Open the history page with a flag to trigger the download
-  chrome.tabs.create({ url: 'history.html?download_latest=true' });
+  // If format and filename are provided, export directly
+  if (message.format && message.filename) {
+    handleExportData({
+      historyId: historyItem.id,
+      format: message.format,
+      filename: message.filename
+    });
+  } else {
+    // Fallback: Open the history page with a flag to trigger the download
+    chrome.tabs.create({ url: 'history.html?download_latest=true' });
+  }
 
   // Clear the temporary job data
   lastStoppedJob = null;
