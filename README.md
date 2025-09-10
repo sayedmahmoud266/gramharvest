@@ -1,6 +1,18 @@
-# GramHarvest - Instagram Data Collection Extension
+<div align="center">
+  <img src="public/logo-full-transparent.png" alt="GramHarvest Logo" width="400"/>
+  
+  # GramHarvest - Instagram Data Collection Extension
+  
+  [![GitHub Stars](https://img.shields.io/github/stars/sayedmahmoud266/gramharvest?style=for-the-badge&logo=github)](https://github.com/sayedmahmoud266/gramharvest)
+  [![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=white)](https://reactjs.org/)
+  [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+  [![Vite](https://img.shields.io/badge/Vite-5.0-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
+  [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-v4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+  [![Chrome Extension](https://img.shields.io/badge/Chrome_Extension-Manifest_v3-4285F4?style=for-the-badge&logo=googlechrome&logoColor=white)](https://developer.chrome.com/docs/extensions/)
+  [![Yarn](https://img.shields.io/badge/Yarn-Package_Manager-2C8EBB?style=for-the-badge&logo=yarn&logoColor=white)](https://yarnpkg.com/)
+</div>
 
-A powerful Chrome extension built with React + TypeScript + TailwindCSS for comprehensive Instagram data collection. Extract detailed post information including metadata, engagement metrics, and media links from Instagram profiles.
+A powerful Chrome extension built with React + TypeScript + TailwindCSS for comprehensive Instagram data collection. Extract detailed post information including metadata, engagement metrics, and media links from Instagram profiles with advanced scraping modes and export capabilities.
 
 ## Tech Stack
 
@@ -16,33 +28,47 @@ A powerful Chrome extension built with React + TypeScript + TailwindCSS for comp
 ### Core Functionality
 - **Enhanced Data Collection:** Extract comprehensive post data including:
   - Post URLs (posts and reels)
-  - Author information
-  - Post captions
-  - Like counts
+  - Author information and usernames
+  - Post captions with multi-line support
+  - Thumbnail image URLs
+  - Like counts with smart number parsing (K, M, B format)
   - Comment counts
-  - Creation dates
+  - Creation dates and timestamps
   - View counts (for videos/reels)
   - Post types (post/reel/story)
+  - Page type detection (main profile/reels tab)
 
 ### User Experience
 - **One-Click Scraping:** Navigate to any Instagram profile and start scraping with a single click
 - **Background Operation:** Scraping runs in the background, allowing you to continue browsing
-- **Auto-Scroll Control:** Toggle automatic scrolling on/off via checkbox
+- **Dual Scraping Modes:**
+  - **Auto-Scroll Mode:** Automatically scrolls to end of profile with continuous content loading
+  - **Manual Scroll Mode:** Scrapes as you manually scroll with debounced scroll detection
 - **Real-time Updates:** Live progress tracking with immediate status updates
 - **Stop & Resume:** Full control over the scraping process
+- **Smart End Detection:** Enhanced algorithms to detect when profile end is reached
 
 ### Export & History
-- **Multiple Export Formats:** Download data as JSON, CSV, or Excel (.xlsx)
+- **Multiple Export Formats:** Download data as JSON, CSV, or modern Excel (.xlsx)
+- **Default Format Selection:** Set preferred export format with persistent storage
+- **Smart CSV Export:** Proper handling of multi-line captions and special characters
+- **Modern XLSX Export:** Full Excel compatibility with structured worksheets
 - **Comprehensive History:** View all past scraping jobs with detailed metadata
-- **Data Preview:** Preview collected data before downloading
+- **Data Preview:** Preview collected data with thumbnail images before downloading
 - **Clear History:** Manage storage with one-click history clearing
 - **Instant Results:** History updates immediately after scraping completes
 
-### Interface
-- **Modern UI:** Beautiful Instagram-inspired gradient design
+### Interface & Information
+- **Modern UI:** Beautiful Instagram-inspired gradient design with backdrop blur effects
+- **Compact Design:** 360px max-height popup with scrollable content
 - **Version Display:** Current extension version shown in UI
 - **Responsive Design:** Optimized for various screen sizes
 - **Smooth Animations:** Enhanced user experience with fluid transitions
+- **Comprehensive Info Section:**
+  - **Privacy Policy:** Transparent data handling and local storage explanation
+  - **License Agreement:** Clear terms of use and responsibility disclaimers
+  - **GitHub Integration:** Direct links to report issues and suggest features
+  - **Developer Attribution:** Credit and contact information
 
 ## Development
 
@@ -95,8 +121,10 @@ Since this extension is not on the Chrome Web Store, you need to load it manuall
 2. **Navigate to Profile:** Go to any Instagram profile page (e.g., `https://www.instagram.com/instagram/`)
 3. **Open Extension:** Click the GramHarvest icon in your browser toolbar
 4. **Configure Settings:**
-   - Toggle **Auto-scroll** on/off as needed
-   - View current extension version
+   - Toggle **Auto-scroll** on/off to choose scraping mode
+   - **Auto-scroll ON:** Extension automatically scrolls to profile end
+   - **Auto-scroll OFF:** Manually scroll while extension scrapes continuously
+   - Set your preferred export format (JSON, CSV, Excel)
 5. **Start Scraping:** Click **"Scrape Current Profile"** button
 6. **Monitor Progress:** View real-time updates of collected posts count
 7. **Stop if Needed:** Use **"Stop Scraping"** button to halt the process
@@ -111,15 +139,38 @@ Since this extension is not on the Chrome Web Store, you need to load it manuall
 4. **Clear History:** Use **"Clear History"** to manage storage space
 
 ### Advanced Features
-- **Auto-scroll Control:** Disable auto-scroll to scrape only visible content
+- **Intelligent Scraping Modes:**
+  - **Auto-scroll:** Continuous scrolling with content loading detection
+  - **Manual scroll:** Debounced scroll event handling for user-controlled scraping
 - **Background Operation:** Close popup while scraping continues
 - **Real-time Updates:** See progress updates without refreshing
-- **Comprehensive Data:** Extract author, captions, engagement metrics, and timestamps
+- **Comprehensive Data:** Extract author, captions, engagement metrics, thumbnails, and timestamps
+- **Duplicate Prevention:** Smart filtering to avoid collecting duplicate posts
+- **Multi-tab Support:** Handle different Instagram page types (main profile, reels tab)
+- **Error Recovery:** Robust error handling with graceful degradation
 
-## License
+## Privacy & Legal
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+### Privacy Policy
+- **No Data Collection:** This extension does not collect any usage data or personal information
+- **Local Storage Only:** All scraped data is stored locally in your browser
+- **No Remote Servers:** No data is transmitted to external servers
+- **Open Source:** Complete transparency - review the code yourself
+
+### License & Disclaimer
+- **MIT License:** Open source project - see [LICENSE](LICENSE) file for details
+- **User Responsibility:** Users are solely responsible for data collection practices
+- **Ethical Use:** Respect Instagram's terms of service and others' privacy
+- **No Liability:** Developers are not responsible for misuse of this tool
+
+## Support & Contributing
+
+- 🐛 [Report Issues](https://github.com/sayedmahmoud266/gramharvest/issues/new?template=bug_report.md&title=[Bug]%20)
+- 💡 [Suggest Features](https://github.com/sayedmahmoud266/gramharvest/issues/new?template=feature_request.md&title=[Feature]%20)
+- ☕ [Buy Me a Coffee](https://www.buymeacoffee.com/sayedmahmoud266)
 
 ## Credits
 
-This extension was coded with the help of Cascade, a powerful agentic AI coding assistant from Windsurf, powered by Google's Gemini Pro models. ❤️
+Developed with ❤️ by [sayedmahmoud266](https://sayedmahmoud266.website)
+
+This extension was coded with the help of Cascade, a powerful agentic AI coding assistant from Windsurf, powered by Google's Gemini Pro models & Anthropic's Claude models.

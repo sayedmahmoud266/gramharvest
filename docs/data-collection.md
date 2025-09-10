@@ -11,12 +11,14 @@ GramHarvest implements a sophisticated data collection system that extracts comp
 interface PostData {
   url: string;           // Direct link to post/reel
   author: string;        // Username of post creator
-  caption: string;       // Full post caption text
-  likes: number;         // Number of likes
-  comments: number;      // Number of comments
+  caption: string;       // Full post caption text with multi-line support
+  thumbnailUrl?: string; // Thumbnail image URL
+  likes: number;         // Number of likes (smart parsed from K, M, B format)
+  comments: number;      // Number of comments (smart parsed)
   createdAt: string;     // Post creation timestamp
-  views?: number;        // View count (videos/reels only)
+  views?: number;        // View count (videos/reels only, smart parsed)
   type: 'post' | 'reel' | 'story';  // Content type
+  pageType?: string;     // Page type (main profile, reels tab)
 }
 ```
 

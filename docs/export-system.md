@@ -2,7 +2,7 @@
 
 ## Overview
 
-GramHarvest provides a flexible export system supporting multiple file formats for different use cases.
+GramHarvest provides a comprehensive export system supporting multiple file formats with enhanced data handling and user preferences for different use cases.
 
 ## Supported Formats
 
@@ -10,6 +10,7 @@ GramHarvest provides a flexible export system supporting multiple file formats f
 - **Purpose**: Complete data preservation with full metadata
 - **Use Case**: Technical analysis, data backup, API integration
 - **Structure**: Full HistoryItem object with nested PostData arrays
+- **Enhanced Features**: Includes thumbnailUrl, pageType, and multi-line captions
 
 ```json
 {
@@ -22,12 +23,14 @@ GramHarvest provides a flexible export system supporting multiple file formats f
     {
       "url": "https://instagram.com/p/ABC123",
       "author": "instagram",
-      "caption": "Welcome to Instagram!",
+      "caption": "Welcome to Instagram!\nCheck out our latest features!",
+      "thumbnailUrl": "https://instagram.com/image.jpg",
       "likes": 1250000,
       "comments": 45000,
       "createdAt": "2023-09-07T12:00:00Z",
       "views": 2500000,
-      "type": "reel"
+      "type": "reel",
+      "pageType": "main"
     }
   ]
 }
@@ -37,16 +40,22 @@ GramHarvest provides a flexible export system supporting multiple file formats f
 - **Purpose**: Spreadsheet compatibility and data analysis
 - **Use Case**: Excel analysis, database imports, reporting
 - **Structure**: Flattened tabular format with headers
+- **Enhanced Features**: Multi-line caption handling (line breaks converted to spaces), proper escaping
 
 ```csv
-URL,Author,Caption,Likes,Comments,Created At,Views,Type
-"https://instagram.com/p/ABC123","instagram","Welcome to Instagram!",1250000,45000,"2023-09-07T12:00:00Z",2500000,"reel"
+URL,Author,Caption,Thumbnail URL,Likes,Comments,Created At,Views,Type,Page Type
+"https://instagram.com/p/ABC123","instagram","Welcome to Instagram! Check out our latest features!","https://instagram.com/image.jpg",1250000,45000,"2023-09-07T12:00:00Z",2500000,"reel","main"
 ```
 
 ### Excel Export (.xlsx)
 - **Purpose**: Business reporting and advanced spreadsheet analysis
 - **Use Case**: Corporate reporting, data visualization, pivot tables
-- **Structure**: Tab-separated values with .xlsx extension for Excel compatibility
+- **Structure**: Modern XLSX format with structured worksheets
+- **Enhanced Features**: 
+  - Uses xlsx library for proper Excel compatibility
+  - Base64 encoding for binary data
+  - Proper MIME type (application/vnd.openxmlformats-officedocument.spreadsheetml.sheet)
+  - Multi-line caption support with preserved formatting
 
 ```
 URL	Author	Caption	Likes	Comments	Created At	Views	Type

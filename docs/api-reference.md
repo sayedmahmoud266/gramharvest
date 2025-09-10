@@ -5,7 +5,7 @@
 ### Core Functions
 
 #### `startScraping(tabId: number): Promise<void>`
-Initiates the scraping process for the specified Chrome tab.
+Initiates the scraping process for the specified Chrome tab with dual mode support.
 
 **Parameters:**
 - `tabId` - Chrome tab identifier containing Instagram profile
@@ -13,8 +13,10 @@ Initiates the scraping process for the specified Chrome tab.
 **Behavior:**
 - Resets scraping state and clears previous data
 - Retrieves auto-scroll settings from storage
+- **Auto-scroll Mode**: Continuous scrolling with content loading detection
+- **Manual Scroll Mode**: Sets up debounced scroll event listener
 - Executes scraping loop until completion or manual stop
-- Saves results to history upon completion
+- Saves results to history with enhanced metadata upon completion
 
 **Example:**
 ```typescript
@@ -30,13 +32,21 @@ Stops the current scraping operation.
 - Updates UI with stopped status
 
 #### `scrapeAndScroll(autoScroll: boolean): Promise<ScrapeResult>`
-Content script function injected into Instagram pages for data extraction.
+Content script function injected into Instagram pages for enhanced data extraction.
 
 **Parameters:**
 - `autoScroll` - Whether to automatically scroll the page
 
 **Returns:**
 - `ScrapeResult` object containing links, posts, and end-of-page status
+
+**Enhanced Features:**
+- Smart end-of-page detection with 1.5s content loading wait
+- Multi-line caption extraction with proper formatting
+- Thumbnail URL extraction from image elements
+- Page type detection (main profile vs reels tab)
+- Smart number parsing for engagement metrics (K, M, B format)
+- Multiple DOM selector fallback strategies
 
 **DOM Selectors Used:**
 ```typescript
@@ -46,13 +56,22 @@ document.querySelectorAll('article')
 // Post links
 article.querySelector('a[href*="/p/"], a[href*="/reel/"]')
 
-// Metadata elements
+// Enhanced metadata extraction with fallbacks
 article.querySelector('a[role="link"] span, header a span') // Author
 article.querySelector('[data-testid="post-caption"] span') // Caption
+article.querySelector('img') // Thumbnail extraction
 article.querySelector('[data-testid="like-count"]') // Likes
 article.querySelector('[data-testid="comments-count"]') // Comments
 article.querySelector('time') // Timestamp
 article.querySelector('[data-testid="video-view-count"]') // Views
+
+// Page type detection
+window.location.pathname.includes('/reels/') // Reels tab detection
+
+// Smart number parsing
+function parseNumber(text: string): number {
+  // Handles K, M, B suffixes (e.g., "1.2K" -> 1200)
+}
 ```
 
 ### Storage Functions
@@ -73,18 +92,25 @@ Saves scraping results to Chrome local storage.
 ```
 
 #### `handleExportData(message: ChromeMessage): Promise<void>`
-Processes export requests and generates downloadable files.
+Processes export requests and generates downloadable files with enhanced formatting.
 
 **Supported Formats:**
-- `json` - Complete data with metadata
-- `csv` - Comma-separated values
-- `excel` - Tab-separated with .xlsx extension
+- `json` - Complete structured data with all metadata
+- `csv` - Comma-separated values with multi-line caption support
+- `excel` - Modern XLSX format with structured worksheets
+
+**Enhanced Export Features:**
+- **CSV**: Proper escaping of multi-line captions (line breaks → spaces)
+- **XLSX**: Modern Excel format using xlsx library with base64 encoding
+- **Default Format Persistence**: User preference saved to Chrome storage
+- **Smart Filename Generation**: Username-based naming with proper extensions
 
 **Export Process:**
 1. Retrieve history item by ID
-2. Format data according to requested type
-3. Create data URL for download
-4. Trigger Chrome download API
+2. Apply format-specific data transformations
+3. Generate proper MIME types and encoding
+4. Create downloadable blob with correct headers
+5. Trigger Chrome download API with enhanced metadata
 
 ### Message Handlers
 
@@ -138,15 +164,40 @@ Processes export requests and generates downloadable files.
 }
 ```
 
+**`manual-scroll-scrape`**
+```typescript
+{
+  command: 'manual-scroll-scrape'
+}
+// Triggered by debounced scroll events in manual mode
+```
+
+**`download-partial`**
+```typescript
+{
+  command: 'download-partial',
+  format: ExportFormat,
+  filename: string
+}
+// Download current scraping results before completion
+```
+
 ## React Components API
 
 ### PopupApp Component
+
+#### Enhanced Features
+- **Compact Design**: 360px max-height with scrollable overflow
+- **Dual Mode Toggle**: Auto-scroll vs manual scroll selection
+- **Export Format Integration**: Uses default format for partial downloads
+- **InfoSection Integration**: Privacy policy, license, and support information
 
 #### State Management
 ```typescript
 interface PopupState {
   state: ScrapingState;
-  autoScroll: boolean;
+  settings: { autoScroll: boolean };
+  defaultExportFormat: 'json' | 'csv' | 'excel';
   version: string;
 }
 ```
