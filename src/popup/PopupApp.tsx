@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ScrapingState, ChromeMessage } from '../types';
+import InfoSection from '../components/InfoSection';
 
 // Import version from package.json
 const VERSION = '1.0.0-dev.1';
@@ -85,7 +86,7 @@ const PopupApp: React.FC = () => {
     (state.message === 'Scraping stopped by user.' || state.message === 'Scraping finished.');
 
   return (
-    <div className="w-80 p-6 bg-gradient-to-br from-instagram-primary via-instagram-secondary to-instagram-accent text-white">
+    <div className="w-80 max-h-96 overflow-y-auto p-6 bg-gradient-to-br from-instagram-primary via-instagram-secondary to-instagram-accent text-white">
       <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 shadow-lg">
         <div className="text-center mb-4">
           <h1 className="text-xl font-bold flex items-center justify-center gap-2 mb-1">
@@ -151,6 +152,11 @@ const PopupApp: React.FC = () => {
           >
             View History
           </button>
+
+          <hr className="border-white/30" />
+          
+          {/* Info Section */}
+          <InfoSection />
         </div>
       </div>
     </div>

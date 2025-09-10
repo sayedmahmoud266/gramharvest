@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { HistoryItem, ChromeMessage, ScrapingSettings, ExportFormat } from '../types';
+import InfoSection from '../components/InfoSection';
 
 // Import version from package.json
 const VERSION = '1.0.0-dev.1';
@@ -322,6 +323,11 @@ const HistoryApp: React.FC = () => {
             </div>
           </div>
         )}
+
+        {/* Info Section */}
+        <div className="mt-8 bg-white/10 backdrop-blur-sm rounded-lg p-6">
+          <InfoSection />
+        </div>
       </div>
     </div>
   );
