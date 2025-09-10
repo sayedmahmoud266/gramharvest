@@ -34,6 +34,8 @@ chrome.runtime.onMessage.addListener((message: ChromeMessage, _sender, sendRespo
     handleClearHistory();
   } else if (message.command === 'update-settings') {
     handleUpdateSettings(message);
+  } else if (message.command === 'manual-scroll-scrape') {
+    handleManualScrollScrape();
   }
 });
 
@@ -65,31 +67,65 @@ async function startScraping(tabId: number): Promise<void> {
   const { scrapingSettings = { autoScroll: true } } = await chrome.storage.local.get('scrapingSettings');
 
   // Main scraping loop
-  while (!state.stopScraping) {
+  if (scrapingSettings.autoScroll) {
+    // Auto-scroll mode: continuous scrolling
+    while (!state.stopScraping) {
+      try {
+        const results = await chrome.scripting.executeScript({
+          target: { tabId: state.currentTabId },
+          func: scrapeAndScroll,
+          args: [true]
+        });
+
+        const result = results[0]?.result;
+        if (!result) continue;
+        const { links, posts, endOfPage }: ScrapeResult = result;
+        links.forEach(link => currentLinks.add(link));
+        posts.forEach(post => currentPosts.push(post));
+        state.count = currentLinks.size;
+        sendStatusUpdate();
+
+        if (endOfPage || state.stopScraping) {
+          break;
+        }
+
+        // Wait a bit before the next scroll to avoid being rate-limited
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      } catch (error) {
+        console.error('Scraping error:', error);
+        break;
+      }
+    }
+  } else {
+    // Manual scroll mode: set up scroll listener and wait for user interaction
     try {
+      await chrome.scripting.executeScript({
+        target: { tabId: state.currentTabId },
+        func: setupManualScrollScraping
+      });
+
+      // Initial scrape of current content
       const results = await chrome.scripting.executeScript({
         target: { tabId: state.currentTabId },
         func: scrapeAndScroll,
-        args: [scrapingSettings.autoScroll]
+        args: [false]
       });
 
       const result = results[0]?.result;
-      if (!result) continue;
-      const { links, posts, endOfPage }: ScrapeResult = result;
-      links.forEach(link => currentLinks.add(link));
-      posts.forEach(post => currentPosts.push(post));
-      state.count = currentLinks.size;
-      sendStatusUpdate();
-
-      if (endOfPage || state.stopScraping) {
-        break;
+      if (result) {
+        const { links, posts }: ScrapeResult = result;
+        links.forEach(link => currentLinks.add(link));
+        posts.forEach(post => currentPosts.push(post));
+        state.count = currentLinks.size;
+        sendStatusUpdate();
       }
 
-      // Wait a bit before the next scroll to avoid being rate-limited
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Keep the scraping active until user stops
+      while (!state.stopScraping) {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
     } catch (error) {
-      console.error('Scraping error:', error);
-      break;
+      console.error('Manual scroll setup error:', error);
     }
   }
 
@@ -177,6 +213,26 @@ function sendStatusUpdate(): void {
 
 function sendHistoryUpdate(history: HistoryItem[]): void {
   chrome.runtime.sendMessage({ command: 'history-update', history }).catch(() => {});
+}
+
+// This function sets up manual scroll scraping with event listeners
+function setupManualScrollScraping(): void {
+  // Remove any existing listeners to avoid duplicates
+  if ((window as any).gramHarvestScrollListener) {
+    window.removeEventListener('scroll', (window as any).gramHarvestScrollListener);
+  }
+
+  let scrollTimeout: NodeJS.Timeout;
+  const scrollListener = () => {
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(() => {
+      // Trigger a scrape after scroll stops
+      chrome.runtime.sendMessage({ command: 'manual-scroll-scrape' });
+    }, 500); // Wait 500ms after scroll stops
+  };
+
+  (window as any).gramHarvestScrollListener = scrollListener;
+  window.addEventListener('scroll', scrollListener, { passive: true });
 }
 
 // This function is injected into the page to perform the scraping
@@ -431,8 +487,20 @@ async function scrapeAndScroll(autoScroll: boolean = true): Promise<ScrapeResult
     }
   });
 
+  // Wait a moment for content to load after scrolling
+  if (autoScroll) {
+    await new Promise(resolve => setTimeout(resolve, 1500));
+  }
+  
   const scrollHeightAfter = document.body.scrollHeight;
-  const endOfPage = scrollHeightBefore === scrollHeightAfter;
+  const currentScrollPosition = window.pageYOffset + window.innerHeight;
+  
+  // Check if we've reached the end by comparing scroll position with page height
+  // Also check if no new content loaded (height didn't change after sufficient time)
+  const endOfPage = autoScroll && (
+    currentScrollPosition >= scrollHeightAfter - 100 || // Near bottom of page
+    scrollHeightBefore === scrollHeightAfter // No new content loaded
+  );
 
   return { links: Array.from(links), posts, endOfPage };
 }
@@ -538,4 +606,39 @@ async function handleClearHistory(): Promise<void> {
 async function handleUpdateSettings(message: any): Promise<void> {
   const { settings } = message;
   await chrome.storage.local.set({ scrapingSettings: settings });
+}
+
+// Handler for manual scroll scraping
+async function handleManualScrollScrape(): Promise<void> {
+  if (!state.isScraping || !state.currentTabId) return;
+
+  try {
+    const results = await chrome.scripting.executeScript({
+      target: { tabId: state.currentTabId },
+      func: scrapeAndScroll,
+      args: [false] // Don't auto-scroll, just scrape current content
+    });
+
+    const result = results[0]?.result;
+    if (result) {
+      const { links, posts }: ScrapeResult = result;
+      const previousCount = currentLinks.size;
+      
+      links.forEach(link => currentLinks.add(link));
+      posts.forEach(post => {
+        // Avoid duplicates by checking if post URL already exists
+        if (!currentPosts.find(p => p.url === post.url)) {
+          currentPosts.push(post);
+        }
+      });
+      
+      // Only update if we found new content
+      if (currentLinks.size > previousCount) {
+        state.count = currentLinks.size;
+        sendStatusUpdate();
+      }
+    }
+  } catch (error) {
+    console.error('Manual scroll scrape error:', error);
+  }
 }
