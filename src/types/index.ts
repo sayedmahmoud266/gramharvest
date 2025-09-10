@@ -7,17 +7,40 @@ export interface ScrapingState {
   stopScraping: boolean;
 }
 
+export interface PostData {
+  url: string;
+  author: string;
+  caption: string;
+  likes: number;
+  comments: number;
+  createdAt: string;
+  views?: number;
+  type: 'post' | 'reel' | 'story';
+}
+
 export interface HistoryItem {
   id: number;
   date: string;
   username: string;
   count: number;
+  posts: PostData[];
+  // Keep links for backward compatibility
   links: string[];
 }
 
 export interface ScrapeResult {
-  links: string[];
+  posts: PostData[];
+  links: string[]; // Keep for backward compatibility
   endOfPage: boolean;
+}
+
+export interface ScrapingSettings {
+  autoScroll: boolean;
+}
+
+export interface ExportFormat {
+  type: 'json' | 'csv' | 'excel';
+  filename: string;
 }
 
 export interface ChromeMessage {

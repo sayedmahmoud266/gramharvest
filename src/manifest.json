@@ -1,6 +1,6 @@
 {
     "manifest_version": 3,
-    "name": "Instagram Profile Scraper",
+    "name": "GramHarvest - Instagram Data Collection. Posts, Reels and more",
     "version": "1.0.0",
     "description": "Scrape all post and reel links from Instagram profiles with a modern React interface.",
     "permissions": [

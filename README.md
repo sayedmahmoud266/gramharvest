@@ -1,24 +1,48 @@
-# Instagram Profile Scraper Extension
+# GramHarvest - Instagram Data Collection Extension
 
-A modern Chrome extension built with React + TypeScript + TailwindCSS to scrape all post and reel links from Instagram profile pages.
+A powerful Chrome extension built with React + TypeScript + TailwindCSS for comprehensive Instagram data collection. Extract detailed post information including metadata, engagement metrics, and media links from Instagram profiles.
 
 ## Tech Stack
 
 - **React 18** with TypeScript for UI components
 - **Vite** for fast development and building
-- **TailwindCSS** for modern, responsive styling
-- **Gulp** for Chrome extension packaging
-- **Chrome Extension Manifest v3**
+- **TailwindCSS v4** for modern, responsive styling
+- **Gulp** for Chrome extension packaging and bundling
+- **Chrome Extension Manifest v3** for modern extension architecture
+- **Yarn** for dependency management
 
 ## Features
 
-- **One-Click Scraping:** Navigate to any Instagram profile and start scraping with a single click.
-- **Background Operation:** The scraping process runs in the background, so you can close the popup and continue browsing.
-- **Continuous Scrolling:** Automatically scrolls the page to load all posts until it reaches the end.
-- **Stop & Resume:** You can stop the scraping process at any time.
-- **Download Results:** Download the scraped links as a JSON file.
-- **Scraping History:** View a history of all past scraping jobs, with the ability to re-download the results at any time.
-- **Modern UI:** Beautiful gradient interface with Instagram-inspired colors and smooth animations.
+### Core Functionality
+- **Enhanced Data Collection:** Extract comprehensive post data including:
+  - Post URLs (posts and reels)
+  - Author information
+  - Post captions
+  - Like counts
+  - Comment counts
+  - Creation dates
+  - View counts (for videos/reels)
+  - Post types (post/reel/story)
+
+### User Experience
+- **One-Click Scraping:** Navigate to any Instagram profile and start scraping with a single click
+- **Background Operation:** Scraping runs in the background, allowing you to continue browsing
+- **Auto-Scroll Control:** Toggle automatic scrolling on/off via checkbox
+- **Real-time Updates:** Live progress tracking with immediate status updates
+- **Stop & Resume:** Full control over the scraping process
+
+### Export & History
+- **Multiple Export Formats:** Download data as JSON, CSV, or Excel (.xlsx)
+- **Comprehensive History:** View all past scraping jobs with detailed metadata
+- **Data Preview:** Preview collected data before downloading
+- **Clear History:** Manage storage with one-click history clearing
+- **Instant Results:** History updates immediately after scraping completes
+
+### Interface
+- **Modern UI:** Beautiful Instagram-inspired gradient design
+- **Version Display:** Current extension version shown in UI
+- **Responsive Design:** Optimized for various screen sizes
+- **Smooth Animations:** Enhanced user experience with fluid transitions
 
 ## Development
 
@@ -40,42 +64,57 @@ A modern Chrome extension built with React + TypeScript + TailwindCSS to scrape 
 
 3. **Build the extension:**
    ```bash
-   yarn build:extension
+   yarn build && yarn build:extension
    ```
 
 4. **For development with hot reload:**
    ```bash
-   yarn watch:extension
+   yarn dev
    ```
+
+### Available Scripts
+- `yarn build` - Build React components with Vite
+- `yarn build:extension` - Package extension with Gulp
+- `yarn dev` - Start development server
+- `yarn lint` - Run TypeScript linting
 
 ## Installation
 
 Since this extension is not on the Chrome Web Store, you need to load it manually in Developer Mode.
 
-1.  **Build the extension:** Run `yarn build:extension` to create the `extension` folder.
-2.  **Open Chrome Extensions:** Open your Chrome browser and navigate to `chrome://extensions`.
-3.  **Enable Developer Mode:** In the top-right corner of the extensions page, turn on the **Developer mode** toggle.
-4.  **Load Unpacked:** Click the **"Load unpacked"** button that appears. A file dialog will open.
-5.  **Select Folder:** Navigate to the location where you downloaded this repository and select the `extension` folder.
-
- The "Instagram Profile Scraper" extension should now appear in your list of extensions and be ready to use.
+1. **Build the extension:** Run `yarn build && yarn build:extension` to create the `build` folder
+2. **Open Chrome Extensions:** Navigate to `chrome://extensions` in Chrome
+3. **Enable Developer Mode:** Toggle the **Developer mode** switch in the top-right corner
+4. **Load Unpacked:** Click **"Load unpacked"** and select the `build` folder from this project
+5. **Verify Installation:** The "GramHarvest" extension should appear in your extensions list
 
 ## How to Use
 
-1.  **Log in to Instagram:** Make sure you are logged into your Instagram account in your regular browser.
-2.  **Navigate to a Profile:** Go to the Instagram profile page you want to scrape (e.g., `https://www.instagram.com/instagram/`).
-3.  **Start Scraping:**
-    *   Click the extension's icon in your browser toolbar.
-    *   Click the **"Scrape Current Profile"** button.
-    *   You can close the popup, and the scraping will continue in the background. You can click the icon again at any time to see the progress.
-4.  **Stop Scraping (Optional):** If you want to stop before it finishes, open the popup and click the **"Stop Scraping"** button.
-5.  **Download Results:**
-    *   After the scrape is finished or stopped, a **"Download Results"** button will appear in the popup. Click it to save the collected links.
-    *   The downloaded file will be named in the format `[username]_ig_posts_[timestamp].json`.
-6.  **View History:**
-    *   Click the **"View History"** button in the popup.
-    *   A new tab will open showing a list of all your past scraping jobs.
-    *   You can download the results from any past job by clicking its corresponding "Download" button.
+### Basic Scraping
+1. **Login to Instagram:** Ensure you're logged into Instagram in your browser
+2. **Navigate to Profile:** Go to any Instagram profile page (e.g., `https://www.instagram.com/instagram/`)
+3. **Open Extension:** Click the GramHarvest icon in your browser toolbar
+4. **Configure Settings:**
+   - Toggle **Auto-scroll** on/off as needed
+   - View current extension version
+5. **Start Scraping:** Click **"Scrape Current Profile"** button
+6. **Monitor Progress:** View real-time updates of collected posts count
+7. **Stop if Needed:** Use **"Stop Scraping"** button to halt the process
+
+### Managing Results
+1. **View History:** Click **"View History"** to see all past scraping jobs
+2. **Preview Data:** Use the **"Preview"** button to examine collected data
+3. **Export Options:** Choose from multiple export formats:
+   - **JSON:** Complete data with all metadata
+   - **CSV:** Spreadsheet-compatible format
+   - **Excel:** .xlsx format for Excel compatibility
+4. **Clear History:** Use **"Clear History"** to manage storage space
+
+### Advanced Features
+- **Auto-scroll Control:** Disable auto-scroll to scrape only visible content
+- **Background Operation:** Close popup while scraping continues
+- **Real-time Updates:** See progress updates without refreshing
+- **Comprehensive Data:** Extract author, captions, engagement metrics, and timestamps
 
 ## License
 
