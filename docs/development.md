@@ -13,7 +13,7 @@
 ```bash
 # Clone the repository
 git clone <repository-url>
-cd instagram-scrapper
+cd gramharvest
 
 # Install dependencies
 yarn install
@@ -25,7 +25,7 @@ yarn build && yarn build:extension
 ## Project Structure
 
 ```
-instagram-scrapper/
+gramharvest/
 ├── src/
 │   ├── background/
 │   │   └── background.ts          # Service worker

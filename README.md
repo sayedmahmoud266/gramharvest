@@ -54,7 +54,7 @@ A powerful Chrome extension built with React + TypeScript + TailwindCSS for comp
 1. **Clone the repository:**
    ```bash
    git clone <repository-url>
-   cd instagram-scrapper
+   cd gramharvest
    ```
 
 2. **Install dependencies:**

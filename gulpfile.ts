@@ -42,7 +42,7 @@ async function copyBuiltFiles() {
 // Create extension package
 function packageExtension() {
   return src('extension/**/*')
-    .pipe(zip('instagram-scraper-extension.zip'))
+    .pipe(zip('gramharvest-extension.zip'))
     .pipe(dest('packages'));
 }
 
