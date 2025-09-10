@@ -181,56 +181,244 @@ async function scrapeAndScroll(autoScroll: boolean = true): Promise<ScrapeResult
   const links = new Set<string>();
   const posts: any[] = [];
   
-  // Find all post articles
-  document.querySelectorAll('article').forEach(article => {
+  // Helper function to extract numeric value from text
+  const extractNumber = (text: string | null | undefined): number => {
+    if (!text) return 0;
+    const cleanText = text.replace(/[^\d.KMB]/gi, '');
+    const num = parseFloat(cleanText);
+    if (isNaN(num)) return 0;
+    
+    if (text.includes('K')) return Math.floor(num * 1000);
+    if (text.includes('M')) return Math.floor(num * 1000000);
+    if (text.includes('B')) return Math.floor(num * 1000000000);
+    return Math.floor(num);
+  };
+
+  // Helper function to get author from profile page
+  const getAuthorFromPage = (): string => {
+    // Try to get username from URL
+    const urlMatch = window.location.pathname.match(/\/([^\/]+)\/?/);
+    if (urlMatch && urlMatch[1] && urlMatch[1] !== 'p' && urlMatch[1] !== 'reel') {
+      return urlMatch[1];
+    }
+    
+    // Try to get from page title or meta tags
+    const titleMatch = document.title.match(/\(@([^)]+)\)/);
+    if (titleMatch) return titleMatch[1];
+    
+    return 'Unknown';
+  };
+
+  // Helper function to detect page type
+  const getPageType = (): 'main_profile' | 'reels_tab' | 'other' => {
+    const url = window.location.href;
+    if (url.includes('/reels/') || url.includes('/reels')) {
+      return 'reels_tab';
+    } else if (url.match(/\/[^\/]+\/?$/)) {
+      return 'main_profile';
+    }
+    return 'other';
+  };
+
+  const currentAuthor = getAuthorFromPage();
+  const pageType = getPageType();
+
+  // Look for post containers based on page type
+  let postContainers: Element[] = [];
+  
+  if (pageType === 'main_profile') {
+    // Main profile tab - posts have image thumbnails with captions in alt attributes
+    postContainers = [
+      ...document.querySelectorAll('a[href*="/p/"]'),
+      ...document.querySelectorAll('a[href*="/reel/"]')
+    ];
+  } else {
+    // Reels tab or other views
+    postContainers = [
+      ...document.querySelectorAll('article'),
+      ...document.querySelectorAll('div[role="button"] a[href*="/p/"], div[role="button"] a[href*="/reel/"]'),
+      ...document.querySelectorAll('a[href*="/p/"], a[href*="/reel/"]')
+    ];
+  }
+
+  // Process each container
+  postContainers.forEach(container => {
     try {
-      // Get post link
-      const linkElement = article.querySelector('a[href*="/p/"], a[href*="/reel/"]');
-      if (!linkElement) return;
+      let linkElement: HTMLAnchorElement | null = null;
+      let postContainer: Element = container;
+
+      // Handle different container types
+      if (container.tagName === 'A') {
+        linkElement = container as HTMLAnchorElement;
+        postContainer = container.closest('div') || container;
+      } else {
+        linkElement = container.querySelector('a[href*="/p/"], a[href*="/reel/"]') as HTMLAnchorElement;
+      }
+
+      if (!linkElement || !linkElement.href) return;
       
-      const url = (linkElement as HTMLAnchorElement).href;
-      if (!url) return;
+      const url = linkElement.href;
+      if (links.has(url)) return; // Skip duplicates
       
       links.add(url);
-      
-      // Try to extract enhanced data
-      const authorElement = article.querySelector('a[role="link"] span, header a span');
-      const captionElement = article.querySelector('[data-testid="post-caption"] span, article div[role="button"] span');
-      const likesElement = article.querySelector('[data-testid="like-count"], a[href*="/liked_by/"]');
-      const commentsElement = article.querySelector('[data-testid="comments-count"], a[href*="/comments/"]');
-      const timeElement = article.querySelector('time');
-      const viewsElement = article.querySelector('[data-testid="video-view-count"]');
       
       // Determine post type
       let postType: 'post' | 'reel' | 'story' = 'post';
       if (url.includes('/reel/')) postType = 'reel';
-      
+      if (url.includes('/stories/')) postType = 'story';
+
+      let caption = '';
+      let thumbnailUrl = '';
+      let likes = 0;
+      let comments = 0;
+      let views = 0;
+      let createdAt = new Date().toISOString();
+
+      if (pageType === 'main_profile') {
+        // Main profile tab - extract from image alt and src
+        const imageElement = linkElement.querySelector('img');
+        if (imageElement) {
+          caption = imageElement.getAttribute('alt') || '';
+          thumbnailUrl = imageElement.getAttribute('src') || '';
+          
+          // Convert relative URLs to absolute URLs
+          if (thumbnailUrl && thumbnailUrl.startsWith('./')) {
+            thumbnailUrl = new URL(thumbnailUrl, window.location.href).href;
+          }
+        }
+        
+        // For main profile, engagement metrics are usually not visible in grid view
+        // We'll set them to 0 and they can be updated if found
+        
+      } else {
+        // Reels tab or other views - use the previous logic
+        const containerParent = postContainer.closest('div') || postContainer;
+        
+        // Look for engagement metrics (likes, comments, views)
+        const engagementElements = [
+          ...containerParent.querySelectorAll('span'),
+          ...postContainer.querySelectorAll('span')
+        ];
+
+        // Parse engagement metrics from spans
+        engagementElements.forEach(span => {
+          const text = span.textContent?.trim();
+          if (!text) return;
+
+          // Check if this span contains numeric data
+          if (/^\d+[\d.,KMB]*$/.test(text.replace(/\s/g, ''))) {
+            const numValue = extractNumber(text);
+            
+            // Determine what this number represents based on context
+            const parentElement = span.closest('li, div, button');
+            const siblings = parentElement ? Array.from(parentElement.parentElement?.children || []) : [];
+            const siblingIndex = siblings.indexOf(parentElement as Element);
+            
+            // Instagram typically shows metrics in order: likes, comments, views (for reels)
+            // Look for visual indicators or aria-labels
+            const hasLikeIcon = parentElement?.querySelector('svg[aria-label*="like"], svg[aria-label*="Like"]');
+            const hasCommentIcon = parentElement?.querySelector('svg[aria-label*="comment"], svg[aria-label*="Comment"]');
+            const hasViewIcon = parentElement?.querySelector('svg[aria-label*="view"], svg[aria-label*="View"]');
+            
+            if (hasLikeIcon || (siblingIndex === 0 && numValue > 0)) {
+              likes = Math.max(likes, numValue);
+            } else if (hasCommentIcon || (siblingIndex === 1 && numValue > 0)) {
+              comments = Math.max(comments, numValue);
+            } else if (hasViewIcon || (postType === 'reel' && numValue > 1000)) {
+              views = Math.max(views, numValue);
+            }
+          }
+        });
+
+        // Try to extract caption from text content (for reels tab, captions are usually not available)
+        const textElements = [
+          ...containerParent.querySelectorAll('span'),
+          ...postContainer.querySelectorAll('span')
+        ];
+        
+        textElements.forEach(element => {
+          const text = element.textContent?.trim();
+          if (text && text.length > caption.length && text.length > 10 && 
+              !text.match(/^\d+[\d.,KMB]*$/) && // Not just numbers
+              !text.includes('ago') && // Not time stamps
+              !text.includes('•')) { // Not metadata
+            caption = text;
+          }
+        });
+
+        // Try to get creation date from time elements or data attributes
+        const timeElement = containerParent.querySelector('time');
+        if (timeElement) {
+          createdAt = timeElement.getAttribute('datetime') || 
+                     timeElement.getAttribute('title') || 
+                     timeElement.textContent || 
+                     createdAt;
+        }
+      }
+
       const postData = {
         url: url,
-        author: authorElement?.textContent?.trim() || 'Unknown',
-        caption: captionElement?.textContent?.trim() || '',
-        likes: parseInt(likesElement?.textContent?.replace(/[^\d]/g, '') || '0') || 0,
-        comments: parseInt(commentsElement?.textContent?.replace(/[^\d]/g, '') || '0') || 0,
-        createdAt: timeElement?.getAttribute('datetime') || timeElement?.textContent || new Date().toISOString(),
-        views: viewsElement ? parseInt(viewsElement.textContent?.replace(/[^\d]/g, '') || '0') : undefined,
-        type: postType
+        author: currentAuthor,
+        caption: caption,
+        thumbnailUrl: thumbnailUrl || undefined,
+        likes: likes,
+        comments: comments,
+        createdAt: createdAt,
+        views: postType === 'reel' && views > 0 ? views : undefined,
+        type: postType,
+        pageType: pageType
       };
       
       posts.push(postData);
+      
     } catch (error) {
       console.log('Error extracting post data:', error);
+      
+      // Fallback: just add the URL
+      if (container.tagName === 'A') {
+        const url = (container as HTMLAnchorElement).href;
+        if (url && !links.has(url)) {
+          links.add(url);
+          posts.push({
+            url: url,
+            author: currentAuthor,
+            caption: '',
+            thumbnailUrl: undefined,
+            likes: 0,
+            comments: 0,
+            createdAt: new Date().toISOString(),
+            views: undefined,
+            type: url.includes('/reel/') ? 'reel' : 'post',
+            pageType: pageType
+          });
+        }
+      }
     }
   });
   
-  // Fallback: collect links from all anchors if no articles found
-  if (links.size === 0) {
-    document.querySelectorAll('a').forEach(anchor => {
-      const href = anchor.href;
-      if (href && (href.includes('/p/') || href.includes('/reel/'))) {
-        links.add(href);
+  // Additional fallback: collect any missed links
+  document.querySelectorAll('a[href*="/p/"], a[href*="/reel/"]').forEach(anchor => {
+    const href = (anchor as HTMLAnchorElement).href;
+    if (href && !links.has(href)) {
+      links.add(href);
+      
+      // Add basic post data for missed links
+      if (!posts.find(p => p.url === href)) {
+        posts.push({
+          url: href,
+          author: currentAuthor,
+          caption: '',
+          thumbnailUrl: undefined,
+          likes: 0,
+          comments: 0,
+          createdAt: new Date().toISOString(),
+          views: undefined,
+          type: href.includes('/reel/') ? 'reel' : 'post',
+          pageType: pageType
+        });
       }
-    });
-  }
+    }
+  });
 
   const scrollHeightAfter = document.body.scrollHeight;
   const endOfPage = scrollHeightBefore === scrollHeightAfter;
