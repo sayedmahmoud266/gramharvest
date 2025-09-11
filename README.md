@@ -14,6 +14,20 @@
 
 A powerful Chrome extension built with React + TypeScript + TailwindCSS for comprehensive Instagram data collection. Extract detailed post information including metadata, engagement metrics, and media links from Instagram profiles with advanced scraping modes and export capabilities.
 
+## 🎬 Demo
+
+<div align="center">
+  <img src="public/demo.gif" alt="GramHarvest Demo" width="800"/>
+</div>
+
+## 📸 Screenshots
+
+<div align="center">
+  <img src="public/screenshots/1.png" alt="Extension Popup" width="300"/>
+  <img src="public/screenshots/2.png" alt="History Page" width="300"/>
+  <img src="public/screenshots/3.png" alt="Data Preview" width="300"/>
+</div>
+
 ## Tech Stack
 
 - **React 18** with TypeScript for UI components

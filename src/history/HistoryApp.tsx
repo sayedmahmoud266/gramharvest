@@ -3,7 +3,7 @@ import { HistoryItem, ChromeMessage, ScrapingSettings, ExportFormat } from '../t
 import InfoSection from '../components/InfoSection';
 
 // Import version from package.json
-const VERSION = '1.0.0-dev.1';
+const VERSION = '1.0.0';
 
 const HistoryApp: React.FC = () => {
   const [history, setHistory] = useState<HistoryItem[]>([]);

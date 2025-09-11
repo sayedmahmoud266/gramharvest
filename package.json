@@ -1,6 +1,6 @@
 {
   "name": "gramharvest-extension",
-  "version": "1.0.0-dev.1",
+  "version": "1.0.0",
   "description": "GramHarvest - Instagram Data Collection Chrome Extension built with React + TypeScript",
   "type": "module",
   "scripts": {

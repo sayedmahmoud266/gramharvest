@@ -3,7 +3,7 @@ import { ScrapingState, ChromeMessage } from '../types';
 import InfoSection from '../components/InfoSection';
 
 // Import version from package.json
-const VERSION = '1.0.0-dev.1';
+const VERSION = '1.0.0';
 
 const PopupApp: React.FC = () => {
   const [state, setState] = useState<ScrapingState>({
